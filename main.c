@@ -1,272 +1,185 @@
-#include "graph.h"
+#include <float.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include"algo.h"
 
-typedef struct GRAPH_NODE_ *pnode;
-;
+#include "algo.c"
+#include "edges.h"
+#include "graph.h"
+#include "nodes.h"
+#include "queue.h"
 
-typedef struct edge_
-{
-    int weight;
-    pnode endpoint;
-    struct edge_ *next;
-} edge, *pedge;
-
-typedef struct GRAPH_NODE_
-{
-    int node_num;
-    pedge edges;
-    struct GRAPH_NODE_ *next;
-} node, *pnode;
-
-int main();
-int graphexist = 0;
-
-int main()
-{
-    struct GRAPH_NODE_ *graph;
-    graph = (struct GRAPH_NODE_ *)malloc(1 * sizeof(struct GRAPH_NODE_));
-    int size = 1;
-    if (!graph)
-    {
-        exit(1);
+void build_graph_cmd(pnode *head) {
+    int i;
+    scanf("%d", &i);
+    pnode source = find_node(i, *head);
+    pedge prev = NULL;
+    while (scanf("%d", &i) == 1) {
+        pnode dest = find_node(i, *head);
+        scanf("%d", &i);
+        prev = new_edge(i, prev, dest);
     }
-    char c;
-    int input = 0;
-    while (1)
-    {
-        if (input == 0)
-        {
-            scanf(" %c", &c);
-        }
-        if (c == 'A')
-        {
-            free(graph->edges);
-            free(graph);
-            graphexist = 1;
-            int size;
-            scanf(" %d", &size);
-            graph = (struct GRAPH_NODE_ *)malloc(size * sizeof(struct GRAPH_NODE_));
-            if (graph == NULL)
-            {
-                exit(1);
-            }
-            for (int i = 0; i < size; i++)
-            {
-                graph[i].node_num = i;
-                graph[i].edges = NULL;
-                graph[i].edges = (pedge)malloc(sizeof(edge));
-                graph[i].edges->endpoint = &graph[i];
-                graph[i].edges->weight = -1;
-                graph[i].edges->next = NULL;
-            }
-            int curr = -1;
-            scanf(" %c", &c);
-            while (1)
-            {
-                if (c == 'n')
-                {
-                    scanf("%d", &curr);
-                    char ch;
-                    while (1)
-                    {
-                        scanf(" %c", &ch);
-                        if (ch == 'n')
-                        {
-                            c = 'n';
-                            break;
-                        }
-                        if (ch < '0' || ch > '9')
-                        {
-                            input = 1;
-                            c = ch;
-                            break;
-                        }
-                        else
-                        {
-                            int dest = ch - 48;
-                            int weight;
-                            scanf("%d", &weight);
-                            pedge edge = graph[curr].edges;
-                            while (edge->next != NULL)
-                            {
-                                edge = edge->next;
-                            }
-                            edge->next = (pedge)malloc(sizeof(edge));
-                            edge->next->weight = weight;
-                            edge->next->endpoint = &(graph[dest]);
-                        }
-                    }
-                }
-            }
-        }
+    source->edges = prev;
+}
 
-        // end of A
-
-        if (c == 'B')
-        {
-            int vernum = -1;
-            int flag = 0;
-            scanf(" %d", &vernum);
-            for (int i = 0; i < size; i++)
-            {
-                if (vernum == graph[i].node_num)
-                {
-                    flag = 1;
-                    break;
-                }
-            }
-            if (flag == 0)
-            {
-                size += 1;
-                graph = (pnode)realloc(graph, size * sizeof(struct GRAPH_NODE_));
-                if (graph != NULL)
-                {
-                    exit(1);
-                }
-                graph[size - 1].node_num = vernum;
-                graph[size - 1].edges = NULL;
-                graph[size - 1].edges = (pedge)malloc(sizeof(edge));
-                graph[size - 1].edges->weight = -1;
-                graph[size - 1].edges->endpoint = &graph[size];
-                graph[size - 1].edges->next = NULL;
-                char dest;
-                int weight;
-                while (1)
-                {
-                    scanf(" %c", &dest);
-                    if (dest < '0' || dest > '9')
-                    {
-                        c = dest;
-                        break;
-                    }
-                    scanf(" %d", &weight);
-                    pedge run = graph[size].edges->next;
-                    while (run->next != NULL)
-                    {
-                        run = run->next;
-                    }
-                    int i = -1;
-                    for (int i = 0; i < size + 1; i++)
-                    {
-                        if (graph[i].node_num == dest - 48)
-                        {
-                            break;
-                        }
-                    }
-                    if (i == -1)
-                    {
-                        continue;
-                    }
-                    run->next = (pedge)malloc(sizeof(edge));
-                    run->next->weight = weight;
-                    run->next->endpoint = &graph[i];
-                }
-            }
-            else
-            {
-                int i = 0;
-                for (int i = 0; i < size - 1; i++)
-                {
-                    if (graph[i].next != NULL && graph[i].next->node_num == vernum)
-                    {
-                        break;
-                    }
-                }
-                pnode up = graph[i].next;
-                free(up->edges);
-                char dest;
-                int weight;
-                while (1)
-                {
-                    scanf(" %c", &dest);
-                    if (dest < '0' || dest > '9')
-                    {
-                        return dest;
-                    }
-                    scanf("%d", &weight);
-                    pedge run = graph[size].edges->next;
-                    while (run->next != NULL)
-                    {
-                        run = run->next;
-                    }
-                    int j = -1;
-                    for (int j = 0; j < size + 1; j++)
-                    {
-                        if (graph[j].node_num == dest - 48)
-                        {
-                            break;
-                        }
-                    }
-                    if (j == -1)
-                    {
-                        continue;
-                    }
-                    run->next = (pedge)malloc(sizeof(edge));
-                    run->next->weight = weight;
-                    run->next->endpoint = &graph[j + 1];
-                }
-            }
-        }
-
-        // end of B
-
-        if (c == 'D')
-        {
-            int removed=-1;
-            removed = scanf(" %d", &removed);
-            int j;
-            for (int i = -1; i < size - 1; i++)
-            {
-                if (&graph[i + 1] != NULL && graph[i + 1].node_num != removed)
-                {
-                    remove_edges(&graph[i+1]);
-                }
-                else
-                {
-                    j = i;
-                }
-            }
-            free(graph[j + 1].edges);
-            pnode todel = graph[j + 1].next;
-            graph[j].next = todel->next;
-            free(todel);
-            graph = (pnode)realloc(graph, (size-1) * sizeof(struct GRAPH_NODE_));
-            size -= 1;
-        }
-
-        //end of 'D'
-
-        if(c=='T'){
-            int arr[6];
-            int counter=0;
-            char key=-1;
-            while(counter<6){
-                scanf(" %c", &key);
-                if(key<'0' || key>'9'){
-                    break;
-                }
-                arr[0+counter]=key-48;
-            }
-            if(sizeof(arr)/sizeof(int)<6){
-                int len=sizeof(arr)/sizeof(int);
-                int newarr[len];
-                for(int p=0; p<len;p++){
-                    newarr[p]=arr[p];
-                }
-                int arr[4]=newarr;
-            }
-            if(sizeof(arr)/sizeof(int)>1){
-                TSP(graph, arr);
-            }
-            else{
-                printf("-1");
-            }
-        }
-    
-        //end of 'T'
+void insert_node_cmd(pnode *head) {
+    int i;
+    scanf("%d", &i);
+    pnode source = find_node(i, *head);
+    if (*head == NULL) {
+        *head = new_node(i, NULL);
+        source = *head;
+    } else if (source != NULL) {
+        remove_out_edges(source);
+    } else {
+        source = insert_node(i, head);
     }
+    pedge prev = NULL;
+    while (scanf("%d", &i) == 1) {
+        pnode dest = find_node(i, *head);
+        scanf("%d", &i);
+        prev = new_edge(i, prev, dest);
+    }
+    source->edges = prev;
+}
+
+void delete_node_cmd(pnode *head) {
+    int i;
+    scanf("%d", &i);
+    pnode check_node = *head;
+    pnode delete = NULL;
+    if (check_node->node_num == i) {
+        head = &(check_node->next);
+        delete = check_node;
+    } else {
+        while (check_node->next) {
+            if (check_node->next->node_num == i) {
+                delete = check_node->next;
+                check_node->next = delete->next;
+                break;
+            }
+            check_node = check_node->next;
+        }
+    }
+    check_node = *head;
+    while (check_node) {
+        remove_source(i, check_node);
+        check_node = check_node->next;
+    }
+    remove_out_edges(delete);
+    free(delete);
+}
+
+void printGraph_cmd(pnode head) {  //for self debug
+    while (head) {
+        printf("node id: %d\n", head->node_num);
+        pedge source = head->edges;
+        while (source) {
+            printf("%d -> %d   w: %d\n", head->node_num, source->endpoint->node_num, source->weight);
+            source = source->next;
+        }
+        head = head->next;
+    }
+}
+
+void deleteGraph_cmd(pnode *head) {
+    pnode source = *head;
+    while (source) {
+        remove_out_edges(source);
+        pnode delete = source;
+        source = source->next;
+        free(delete);
+    }
+}
+void shortsPath_cmd(pnode head) {
+    int src;
+    int dest;
+    int got = 0;
+    while (got == 0) {
+        got = scanf("%d", &src);
+    }
+    got = 0;
+    while (got == 0) {
+        got = scanf("%d", &dest);
+    }
+    pnode source;
+    pnode curr = head;
+    int j = 0;
+    int dst_index;
+    int src_index;
+    while (curr) {
+        curr->index = j;
+        if (curr->node_num == src) {
+            source = curr;
+            src_index = j;
+        }
+        if (curr->node_num == dest) {
+            dst_index = j;
+        }
+        j++;
+        curr = curr->next;
+    }
+    int *arr = (int *)malloc(sizeof(int) * j);
+    for (int i = 0; i < j; i++) {
+        arr[i] = INT_MAX;
+    }
+    arr[src_index] = 0;
+    dijkstra(arr, source);
+    printf("Dijsktra shortest path: %d \n", arr[dst_index] < INT_MAX ? arr[dst_index] : -1);
+    free(arr);
+}
+
+void TSP_cmd(pnode head) {
+    int j;
+    scanf("%d", &j);
+    int *cities = (int *)malloc(sizeof(int) * j);
+    for (int i = 0; i < j; i++) {
+        scanf("%d", &cities[i]);
+    }
+    int number_of_nodes = 0;
+    pnode source = head;
+    while (source) {
+        source->index = number_of_nodes;
+        number_of_nodes++;
+        source = source->next;
+    }
+    int ans = INT_MAX;
+    permutation(cities, 0, j - 1, number_of_nodes, &ans, head);
+    printf("TSP shortest path: %d \n", ans != INT_MAX ? ans : -1);
+    free(cities);
+}
+
+int main() {
+    char s;
+    int k;
+    pnode head = NULL;
+    while (scanf("%c", &s) != EOF) {
+        switch (s) {
+            case 'A':
+                deleteGraph_cmd(&head);
+                scanf("%d", &k);
+                head = generate(k);
+                break;
+            case 'n':
+                build_graph_cmd(&head);
+                break;
+            case 'B':
+                insert_node_cmd(&head);
+                break;
+            case 'p':
+                printGraph_cmd(head);
+                break;
+            case 'S':
+                shortsPath_cmd(head);
+                break;
+            case 'D':
+                delete_node_cmd(&head);
+                break;
+            case 'T':
+                TSP_cmd(head);
+                break;
+        }
+    }
+    deleteGraph_cmd(&head);
+    return 0;
 }
