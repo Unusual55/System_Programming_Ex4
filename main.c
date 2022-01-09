@@ -49,7 +49,7 @@ void delete_node_cmd(pnode *head) {
     pnode check_node = *head;
     pnode delete = NULL;
     if (check_node->node_num == i) {
-        head = &(check_node->next);
+        *head = (check_node->next);
         delete = check_node;
     } else {
         while (check_node->next) {
